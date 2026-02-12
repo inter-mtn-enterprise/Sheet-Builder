@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Production Sheet Tool</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .job-number-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .job-number-input label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .job-number-input input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+        }
+
+        .controls {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .csv-status {
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .csv-status.loaded {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .banners-table {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .banners-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .banners-table thead {
+            background: #f1f5f9;
+        }
+
+        .banners-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .banners-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .banners-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .banner-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .banner-image img,
+        .banner-image object {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .banner-image .image-placeholder {
+            padding: 4px;
+        }
+
+        .banner-info {
+            min-width: 200px;
+        }
+
+        .banner-sku {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .banner-name {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        input[type="number"],
+        select {
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            width: 80px;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .modal-close:hover {
+            background: #f1f5f9;
+        }
+
+        .modal-filters {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .modal-filters input,
+        .modal-filters select {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .banner-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        @media (min-width: 1200px) {
+            .banner-list {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .banner-list {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        .banner-item {
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s;
+            background: #fff;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .banner-item:hover {
+            background: #f8fafc;
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner-item input[type="checkbox"] {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .banner-item-image {
+            width: 100%;
+            height: 140px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .banner-item-image img,
+        .banner-item-image object {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .banner-item-image object {
+            pointer-events: none;
+            border: none !important;
+        }
+
+        .banner-item-image object::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        .banner-item-image object embed,
+        .banner-item-image object iframe {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            border: none !important;
+            overflow: hidden !important;
+        }
+
+        .banner-item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .banner-item-sku {
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .banner-item-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .banner-item-category {
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 3px 6px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .selected-count {
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-right: auto;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .controls,
+            .btn,
+            .modal-overlay,
+            .file-input-wrapper,
+            .csv-status,
+            .remove-btn {
+                display: none !important;
+            }
+
+            header {
+                box-shadow: none;
+                border-bottom: 2px solid #000;
+                margin-bottom: 20px;
+            }
+
+            .banners-table {
+                box-shadow: none;
+            }
+
+            .banners-table th,
+            .banners-table td {
+                border: 1px solid #000;
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            .banners-table th {
+                background: #f0f0f0;
+                font-weight: bold;
+            }
+
+            .banner-image {
+                width: 50px;
+                height: 50px;
+            }
+
+            input[type="number"],
+            select {
+                border: none;
+                background: transparent;
+                width: 100%;
+                padding: 0;
+            }
+
+            .print-tracking {
+                width: 80px;
+            }
+
+            .print-tracking input {
+                width: 100%;
+                border-bottom: 1px solid #000;
+                padding: 4px 0;
+            }
+
+            @page {
+                margin: 1cm;
+            }
+        }
+
+        /* Print Card Styles (for print view) */
+        .print-card-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .print-card {
+            border: 2px solid #000;
+            padding: 15px;
+            page-break-inside: avoid;
+            display: flex;
+            gap: 15px;
+        }
+
+        .print-card-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 250px;
+            width: 250px;
+        }
+
+        .print-card-image {
+            width: 100%;
+            height: 180px;
+            border: 1px solid #000;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .print-card-image img,
+        .print-card-image object {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .print-card-tracking {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .print-card-tracking-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .print-card-tracking-section label {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .print-card-tracking-section .time-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .print-card-tracking-section input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #000;
+            padding: 4px 0;
+            background: transparent;
+            font-size: 11px;
+        }
+
+        .print-card-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .print-card-info-row {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+        }
+
+        .print-card-info-label {
+            font-weight: bold;
+            min-width: 100px;
+        }
+
+        .print-card-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .print-card-checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .print-card-checkbox-group-title {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .print-card-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Banner Production Sheet Tool</h1>
+            <div class="job-number-input">
+                <label for="jobNumber">Job #:</label>
+                <input type="text" id="jobNumber" placeholder="Enter job number">
+            </div>
+        </header>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="addBannerBtn">
+                <span>➕</span> Add Banner
+            </button>
+            <div class="file-input-wrapper">
+                <button class="btn btn-secondary" onclick="document.getElementById('csvFileInput').click()">
+                    <span>📁</span> Load CSV
+                </button>
+                <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            </div>
+            <span class="csv-status" id="csvStatus">No CSV loaded</span>
+            <button class="btn btn-danger" id="clearAllBtn">Clear All</button>
+            <button class="btn btn-success" id="printBtn">
+                <span>🖨️</span> Print Sheet
+            </button>
+        </div>
+
+        <div class="banners-table">
+            <table id="bannersTable">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Image</th>
+                        <th style="min-width: 250px;">SKU / Name</th>
+                        <th style="width: 100px;">Job #</th>
+                        <th style="width: 80px;">Qty</th>
+                        <th style="width: 100px;">Qty in Order</th>
+                        <th style="width: 100px;">Stock Qty</th>
+                        <th style="width: 120px;">Stencil</th>
+                        <th style="width: 100px;">Ink</th>
+                        <th style="width: 100px;">Ticker Tape</th>
+                        <th style="width: 80px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="bannersTableBody">
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                </svg>
+                                <p>No banners added yet. Click "Add Banner" to get started.</p>
+                                <p style="margin-top: 8px; font-size: 12px;">Make sure to load your CSV file first!</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="bannerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Select Banners</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-filters">
+                <input type="text" id="searchInput" placeholder="Search by SKU, Name, or Product Code...">
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="modal-content">
+                <div class="banner-list" id="bannerList">
+                    <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+                        Please load a CSV file first to see available banners.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="selected-count" id="selectedCount">0 selected</div>
+                <button class="btn btn-secondary" id="cancelModal">Cancel</button>
+                <button class="btn btn-primary" id="addSelectedBtn">Add Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let allBanners = [];
+        let selectedBanners = [];
+        let nextBannerId = 1;
+
+
+        // CSV Parser
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            if (lines.length < 2) return [];
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+
+                if (values.length >= 4) {
+                    data.push({
+                        id: values[0] || '',
+                        name: values[1] || '',
+                        sku: values[2] || '',
+                        productCode: values[3] || ''
+                    });
+                }
+            }
+
+            return data;
+        }
+
+        // Load CSV file
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                allBanners = parseCSV(event.target.result);
+                updateCSVStatus(allBanners.length);
+                populateCategoryFilter();
+                updateBannerList();
+            };
+            reader.readAsText(file);
+        });
+
+        function updateCSVStatus(count) {
+            const status = document.getElementById('csvStatus');
+            if (count > 0) {
+                status.textContent = `${count} banners loaded`;
+                status.classList.add('loaded');
+            } else {
+                status.textContent = 'No CSV loaded';
+                status.classList.remove('loaded');
+            }
+        }
+
+        function getCategoryFromProductCode(productCode) {
+            if (!productCode) return 'Other';
+            const parts = productCode.split(':');
+            return parts[0] || 'Other';
+        }
+
+        function populateCategoryFilter() {
+            const categories = new Set();
+            allBanners.forEach(banner => {
+                const category = getCategoryFromProductCode(banner.productCode);
+                categories.add(category);
+            });
+
+            const filter = document.getElementById('categoryFilter');
+            const currentValue = filter.value;
+            filter.innerHTML = '<option value="">All Categories</option>';
+            
+            Array.from(categories).sort().forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                filter.appendChild(option);
+            });
+
+            if (currentValue) {
+                filter.value = currentValue;
+            }
+        }
+
+        function getImagePath(sku) {
+            // Hardcoded image path
+            const imagePath = 'H:\\Marketing\\Website\\FINAL CONTENT  NEW SITE 2021\\Working Folder\\Website photos\\Product Images\\Catalogue Signs\\High Vis Banners & Poly Discs\\High Vis Banners';
+            
+            // Normalize the path
+            let basePath = imagePath;
+            if (!basePath.endsWith('/') && !basePath.endsWith('\\')) {
+                basePath += '/';
+            }
+
+            // Convert Windows drive path to file:// URL
+            if (/^[A-Za-z]:/.test(basePath)) {
+                // Windows drive path like H:\ -> file:///H:/
+                basePath = 'file:///' + basePath.replace(/\\/g, '/');
+            }
+
+            // Try multiple formats: JPG first (user has JPGs), then PDF, PNG
+            const formats = ['jpg', 'jpeg', 'pdf', 'png'];
+            const paths = formats.map(format => `${basePath}${sku}.${format}`);
+            // #region agent log
+            fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:getImagePath',message:'getImagePath called',data:{sku:sku,basePath:basePath,paths:paths},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+            // #endregion
+            return paths;
+        }
+
+        function getImageHTML(sku) {
+            const imagePaths = getImagePath(sku);
+
+            const skuEscaped = escapeHtml(sku);
+            // JPG is now first, PDF is fallback
+            const imgPath = imagePaths[0]; // JPG is first
+            const pdfPath = imagePaths.find(p => p.toLowerCase().endsWith('.pdf')) || null; // PDF fallback
+            
+            let html = '<div class="banner-image" data-sku="' + skuEscaped + '">';
+            html += '<div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px;" class="image-placeholder">' + escapeHtml(sku.substring(0, 8)) + '</div>';
+            // Try JPG first, PDF as fallback
+            if (imgPath) {
+                html += '<img src="' + escapeHtml(imgPath) + '" alt="' + skuEscaped + '" style="width: 100%; height: 100%; object-fit: contain; display: none; max-width: 100%; max-height: 100%;" class="image-img">';
+            }
+            if (pdfPath) {
+                html += '<object data="' + escapeHtml(pdfPath) + '" type="application/pdf" style="width: 100%; height: 100%; display: none;" class="image-pdf"></object>';
+            }
+            html += '</div>';
+            return html;
+        }
+        
+        // #region agent log
+        function debugLogOverflow(context) {
+            // Log all image containers and check if children overflow
+            const selectors = ['.banner-image', '.banner-item-image', '.print-card-image'];
+            const results = [];
+            selectors.forEach(sel => {
+                document.querySelectorAll(sel).forEach((container, idx) => {
+                    const rect = container.getBoundingClientRect();
+                    const cs = getComputedStyle(container);
+                    const childData = [];
+                    Array.from(container.children).forEach(child => {
+                        const cr = child.getBoundingClientRect();
+                        const overflowsRight = cr.right > rect.right + 1;
+                        const overflowsBottom = cr.bottom > rect.bottom + 1;
+                        const overflowsLeft = cr.left < rect.left - 1;
+                        const overflowsTop = cr.top < rect.top - 1;
+                        childData.push({
+                            tag: child.tagName,
+                            class: child.className,
+                            childW: Math.round(cr.width),
+                            childH: Math.round(cr.height),
+                            overflows: overflowsRight || overflowsBottom || overflowsLeft || overflowsTop,
+                            overflowsRight, overflowsBottom, overflowsLeft, overflowsTop,
+                            display: child.style.display || getComputedStyle(child).display,
+                            position: getComputedStyle(child).position,
+                            inlineStyle: child.getAttribute('style')?.substring(0, 200)
+                        });
+                    });
+                    if (childData.some(c => c.overflows) || childData.some(c => c.childW > rect.width + 2 || c.childH > rect.height + 2)) {
+                        results.push({
+                            selector: sel,
+                            index: idx,
+                            containerW: Math.round(rect.width),
+                            containerH: Math.round(rect.height),
+                            overflow: cs.overflow,
+                            sku: container.getAttribute('data-sku'),
+                            children: childData
+                        });
+                    }
+                });
+            });
+            fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:debugLogOverflow',message:'Overflow check: ' + context,data:{overflowingContainers: results.length, details: results.slice(0, 10)},timestamp:Date.now(),hypothesisId:'H1-H5'})}).catch(()=>{});
+        }
+        // Schedule overflow checks after various load phases
+        setTimeout(() => debugLogOverflow('after-1s'), 1000);
+        setTimeout(() => debugLogOverflow('after-3s'), 3000);
+        setTimeout(() => debugLogOverflow('after-5s'), 5000);
+        // #endregion
+
+        function setupImageLoading() {
+            document.querySelectorAll('.banner-image').forEach(container => {
+                const sku = container.getAttribute('data-sku');
+                const placeholder = container.querySelector('.image-placeholder');
+                const pdf = container.querySelector('.image-pdf');
+                const img = container.querySelector('.image-img');
+                
+                // Try JPG first (since user has JPGs and they work)
+                if (img) {
+                    img.style.display = 'block';
+                    // #region agent log
+                    fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:setupImageLoading:imgStart',message:'Attempting to load JPG first',data:{sku:sku,imgSrc:img.getAttribute('src')},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+                    // #endregion
+                    img.onerror = function() {
+                        // JPG failed, try PDF as fallback
+                        if (pdf) {
+                            pdf.style.display = 'block';
+                            // #region agent log
+                            fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:setupImageLoading:pdfFallback',message:'Falling back to PDF after JPG failed',data:{sku:sku,pdfSrc:pdf.getAttribute('data')},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+                            // #endregion
+                            setTimeout(function() {
+                                if (pdf.offsetHeight === 0) {
+                                    if (placeholder) placeholder.style.display = 'block';
+                                } else {
+                                    if (placeholder) placeholder.style.display = 'none';
+                                }
+                            }, 500);
+                        } else {
+                            if (placeholder) placeholder.style.display = 'block';
+                        }
+                        // #region agent log
+                        fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:setupImageLoading:imgError',message:'JPG image failed to load',data:{sku:sku,imgSrc:img.getAttribute('src')},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+                        // #endregion
+                    };
+                    img.onload = function() {
+                        if (placeholder) placeholder.style.display = 'none';
+                        // #region agent log
+                        fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:setupImageLoading:imgSuccess',message:'JPG image loaded successfully',data:{sku:sku,imgSrc:img.getAttribute('src'),imgW:img.naturalWidth,imgH:img.naturalHeight},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+                        // #endregion
+                    };
+                } else if (pdf) {
+                    img.style.display = 'block';
+                    img.onerror = function() {
+                        if (placeholder) placeholder.style.display = 'block';
+                    };
+                    img.onload = function() {
+                        if (placeholder) placeholder.style.display = 'none';
+                    };
+                }
+            });
+        }
+
+        function createImageElement(sku, isPrint = false) {
+            const container = document.createElement('div');
+            container.className = isPrint ? 'print-card-image' : 'banner-image';
+            
+            const imagePaths = getImagePath(sku);
+            
+            if (!imagePaths || imagePaths.length === 0) {
+                // No path configured, show placeholder
+                container.innerHTML = `<div style="font-size: ${isPrint ? '14px' : '10px'}; color: #64748b; text-align: center; padding: 4px; ${isPrint ? 'font-weight: bold;' : ''}">${isPrint ? 'IMAGE' : sku.substring(0, 8)}</div>`;
+                return container;
+            }
+
+            // Create placeholder first
+            const placeholder = document.createElement('div');
+            placeholder.style.cssText = `font-size: ${isPrint ? '14px' : '10px'}; color: #64748b; text-align: center; padding: 4px; ${isPrint ? 'font-weight: bold;' : ''}`;
+            placeholder.textContent = isPrint ? 'IMAGE' : sku.substring(0, 8);
+            container.appendChild(placeholder);
+
+            // Try to load image, starting with first format
+            let currentFormatIndex = 0;
+            let loadedSuccessfully = false;
+            
+            function tryNextFormat() {
+                if (currentFormatIndex >= imagePaths.length) {
+                    // All formats failed, keep placeholder visible
+                    return;
+                }
+
+                const currentPath = imagePaths[currentFormatIndex];
+                const format = currentPath.split('.').pop().toLowerCase();
+
+                if (format === 'pdf') {
+                    // For PDFs, use object tag
+                    const pdfObject = document.createElement('object');
+                    pdfObject.data = currentPath;
+                    pdfObject.type = 'application/pdf';
+                    pdfObject.style.cssText = 'max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);';
+                    pdfObject.onerror = function(e) {
+                        currentFormatIndex++;
+                        tryNextFormat();
+                    };
+                    // PDFs don't have onload, so we'll try to detect if it loaded
+                    setTimeout(function() {
+                        if (pdfObject.offsetHeight > 0 || pdfObject.contentDocument) {
+                            placeholder.style.display = 'none';
+                            pdfObject.style.display = 'block';
+                            loadedSuccessfully = true;
+                        } else {
+                            // PDF didn't load, try next format
+                            currentFormatIndex++;
+                            tryNextFormat();
+                        }
+                    }, 500);
+                    container.appendChild(pdfObject);
+                } else {
+                    // For images (JPG, PNG)
+                    const img = document.createElement('img');
+                    img.src = currentPath;
+                    img.alt = sku;
+                    img.style.cssText = 'max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);';
+                    img.onerror = function(e) {
+                        currentFormatIndex++;
+                        tryNextFormat();
+                    };
+                    img.onload = function() {
+                        // Successfully loaded - hide placeholder and show image
+                        placeholder.style.display = 'none';
+                        img.style.display = 'block';
+                        loadedSuccessfully = true;
+                        // #region agent log
+                        const cRect = container.getBoundingClientRect();
+                        const iRect = img.getBoundingClientRect();
+                        fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:createImageElement:img.onload',message:'Image loaded in createImageElement',data:{sku:sku,isPrint:isPrint,containerW:Math.round(cRect.width),containerH:Math.round(cRect.height),imgW:Math.round(iRect.width),imgH:Math.round(iRect.height),imgNaturalW:img.naturalWidth,imgNaturalH:img.naturalHeight,overflowsW:iRect.width>cRect.width+2,overflowsH:iRect.height>cRect.height+2,containerClass:container.className,containerOverflow:getComputedStyle(container).overflow},timestamp:Date.now(),hypothesisId:'H2-H3'})}).catch(()=>{});
+                        // #endregion
+                    };
+                    container.appendChild(img);
+                }
+            }
+
+            tryNextFormat();
+            return container;
+        }
+
+        function filterBanners() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            return allBanners.filter(banner => {
+                const matchesSearch = !searchTerm || 
+                    banner.sku.toLowerCase().includes(searchTerm) ||
+                    banner.name.toLowerCase().includes(searchTerm) ||
+                    banner.productCode.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = !categoryFilter || 
+                    getCategoryFromProductCode(banner.productCode) === categoryFilter;
+
+                return matchesSearch && matchesCategory;
+            });
+        }
+
+        function updateBannerList() {
+            const filtered = filterBanners();
+            const list = document.getElementById('bannerList');
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">No banners found.</p>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(banner => `
+                <div class="banner-item" data-banner-id="${banner.id}">
+                    <input type="checkbox" data-banner-id="${banner.id}" class="banner-checkbox">
+                    <div class="banner-item-image" data-sku="${escapeHtml(banner.sku)}" data-lazy="true">
+                        <div style="font-size: 10px; color: #64748b; text-align: center; padding: 4px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">${escapeHtml(banner.sku.substring(0, 8))}</div>
+                    </div>
+                    <div class="banner-item-info">
+                        <div class="banner-item-sku">${escapeHtml(banner.sku)}</div>
+                        <div class="banner-item-name">${escapeHtml(banner.name)}</div>
+                        <div class="banner-item-category">${escapeHtml(getCategoryFromProductCode(banner.productCode))}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add checkbox listeners
+            document.querySelectorAll('.banner-checkbox').forEach(cb => {
+                cb.addEventListener('change', updateSelectedCount);
+            });
+
+            // Make cards clickable to toggle checkbox
+            document.querySelectorAll('.banner-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Don't toggle if clicking directly on the checkbox
+                    if (e.target.type !== 'checkbox') {
+                        const checkbox = this.querySelector('.banner-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                            updateSelectedCount();
+                        }
+                    }
+                });
+            });
+
+            // Set up lazy loading for modal images using Intersection Observer
+            setupLazyImageLoading();
+        }
+
+        let imageObserver = null;
+
+        function setupLazyImageLoading() {
+            // Clean up existing observer if any
+            if (imageObserver) {
+                imageObserver.disconnect();
+            }
+
+            // Create Intersection Observer for lazy loading
+            imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const container = entry.target;
+                        const sku = container.getAttribute('data-sku');
+                        const isLazy = container.getAttribute('data-lazy') === 'true';
+                        
+                        if (sku && isLazy) {
+                            // Mark as loading to prevent duplicate loads
+                            container.setAttribute('data-lazy', 'false');
+                            // Load the image
+                            loadModalImage(container, sku);
+                            // Stop observing this element
+                            observer.unobserve(container);
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '50px' // Start loading 50px before the element comes into view
+            });
+
+            // Observe all lazy image containers
+            document.querySelectorAll('.banner-item-image[data-lazy="true"]').forEach(container => {
+                imageObserver.observe(container);
+            });
+        }
+
+
+        function loadModalImage(container, sku) {
+            const imagePaths = getImagePath(sku);
+            
+            if (!imagePaths || imagePaths.length === 0) {
+                return;
+            }
+
+            // Find placeholder
+            const placeholder = container.querySelector('div');
+            let pdf = null;
+            let img = null;
+
+            // Try to load image, starting with first format
+            let currentFormatIndex = 0;
+            
+            function tryNextFormat() {
+                if (currentFormatIndex >= imagePaths.length) {
+                    // All formats failed, keep placeholder visible
+                    return;
+                }
+
+                const currentPath = imagePaths[currentFormatIndex];
+                const format = currentPath.split('.').pop().toLowerCase();
+
+                if (format === 'pdf') {
+                    pdf = document.createElement('object');
+                    pdf.data = currentPath + '#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit';
+                    pdf.type = 'application/pdf';
+                    pdf.style.cssText = 'max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; border: none;';
+                    container.appendChild(pdf);
+                    
+                    setTimeout(function() {
+                        if (pdf.offsetHeight > 0 || pdf.contentDocument) {
+                            if (placeholder) placeholder.style.display = 'none';
+                            if (img) img.style.display = 'none';
+                        } else {
+                            // PDF didn't load, try next format
+                            if (pdf && pdf.parentNode) {
+                                pdf.parentNode.removeChild(pdf);
+                            }
+                            currentFormatIndex++;
+                            tryNextFormat();
+                        }
+                    }, 500);
+                } else {
+                    img = document.createElement('img');
+                    img.src = currentPath;
+                    img.alt = sku;
+                    img.style.cssText = 'max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);';
+                    container.appendChild(img);
+                    
+                    img.onerror = function() {
+                        // Image failed, try next format
+                        if (img && img.parentNode) {
+                            img.parentNode.removeChild(img);
+                        }
+                        currentFormatIndex++;
+                        tryNextFormat();
+                    };
+                    img.onload = function() {
+                        // Successfully loaded
+                        if (placeholder) placeholder.style.display = 'none';
+                        if (pdf) pdf.style.display = 'none';
+                        // #region agent log
+                        const cRect2 = container.getBoundingClientRect();
+                        const iRect2 = img.getBoundingClientRect();
+                        fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:loadModalImage:img.onload',message:'Modal image loaded',data:{sku:sku,containerW:Math.round(cRect2.width),containerH:Math.round(cRect2.height),imgW:Math.round(iRect2.width),imgH:Math.round(iRect2.height),imgNaturalW:img.naturalWidth,imgNaturalH:img.naturalHeight,overflowsW:iRect2.width>cRect2.width+2,overflowsH:iRect2.height>cRect2.height+2,containerClass:container.className,imgStyleInline:img.getAttribute('style')?.substring(0,200)},timestamp:Date.now(),hypothesisId:'H1-H3'})}).catch(()=>{});
+                        // #endregion
+                    };
+                }
+            }
+
+            tryNextFormat();
+        }
+
+        function updateSelectedCount() {
+            const checked = document.querySelectorAll('.banner-checkbox:checked').length;
+            document.getElementById('selectedCount').textContent = `${checked} selected`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function addSelectedBanners() {
+            const checked = document.querySelectorAll('.banner-checkbox:checked');
+            const selectedIds = Array.from(checked).map(cb => cb.getAttribute('data-banner-id'));
+
+            const globalJobNumber = document.getElementById('jobNumber').value || '';
+            selectedIds.forEach(id => {
+                const banner = allBanners.find(b => b.id === id);
+                if (banner && !selectedBanners.find(sb => sb.id === banner.id)) {
+                    selectedBanners.push({
+                        ...banner,
+                        internalId: nextBannerId++,
+                        jobNumber: globalJobNumber,
+                        qty: 1,
+                        qtyInOrder: 1,
+                        stockQty: 0,
+                        stencil: {
+                            styrene: false,
+                            vinyl: false,
+                            extraSticky: false
+                        },
+                        ink: {
+                            white: false,
+                            black: false
+                        },
+                        tickerTape: {
+                            yes: false,
+                            no: false
+                        }
+                    });
+                }
+            });
+
+            updateBannersTable();
+            closeModal();
+        }
+
+        function updateBannersTable() {
+            const tbody = document.getElementById('bannersTableBody');
+            
+            if (selectedBanners.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                </svg>
+                                <p>No banners added yet. Click "Add Banner" to get started.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = selectedBanners.map(banner => {
+                const imageHtml = getImageHTML(banner.sku);
+                return `
+                <tr data-internal-id="${banner.internalId}">
+                    <td>${imageHtml}</td>
+                    <td class="banner-info">
+                        <div class="banner-sku">${escapeHtml(banner.sku)}</div>
+                        <div class="banner-name">${escapeHtml(banner.name)}</div>
+                    </td>
+                    <td>
+                        <input type="text" value="${escapeHtml(banner.jobNumber || '')}" 
+                               placeholder="Job #"
+                               onchange="updateBannerField(${banner.internalId}, 'jobNumber', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" min="1" value="${banner.qty}" 
+                               onchange="updateBannerField(${banner.internalId}, 'qty', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" min="0" value="${banner.qtyInOrder}" 
+                               onchange="updateBannerField(${banner.internalId}, 'qtyInOrder', this.value)">
+                    </td>
+                    <td>
+                        <input type="number" min="0" value="${banner.stockQty}" 
+                               onchange="updateBannerField(${banner.internalId}, 'stockQty', this.value)">
+                    </td>
+                    <td>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="stencil-styrene-${banner.internalId}" 
+                                       ${banner.stencil.styrene ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'stencil', 'styrene', this.checked)">
+                                <label for="stencil-styrene-${banner.internalId}">Styrene</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="stencil-vinyl-${banner.internalId}" 
+                                       ${banner.stencil.vinyl ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'stencil', 'vinyl', this.checked)">
+                                <label for="stencil-vinyl-${banner.internalId}">Vinyl</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="stencil-extrasticky-${banner.internalId}" 
+                                       ${banner.stencil.extraSticky ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'stencil', 'extraSticky', this.checked)">
+                                <label for="stencil-extrasticky-${banner.internalId}">Extra Sticky</label>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="ink-white-${banner.internalId}" 
+                                       ${banner.ink.white ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'ink', 'white', this.checked)">
+                                <label for="ink-white-${banner.internalId}">White</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="ink-black-${banner.internalId}" 
+                                       ${banner.ink.black ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'ink', 'black', this.checked)">
+                                <label for="ink-black-${banner.internalId}">Black</label>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="ticker-yes-${banner.internalId}" 
+                                       ${banner.tickerTape.yes ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'tickerTape', 'yes', this.checked)">
+                                <label for="ticker-yes-${banner.internalId}">Yes</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="ticker-no-${banner.internalId}" 
+                                       ${banner.tickerTape.no ? 'checked' : ''}
+                                       onchange="updateBannerCheckbox(${banner.internalId}, 'tickerTape', 'no', this.checked)">
+                                <label for="ticker-no-${banner.internalId}">No</label>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger remove-btn" onclick="removeBanner(${banner.internalId})" style="padding: 6px 12px; font-size: 12px;">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+            
+            // Set up image loading after table is created
+            setTimeout(setupImageLoading, 100);
+        }
+
+        function updateBannerField(internalId, field, value) {
+            const banner = selectedBanners.find(b => b.internalId === internalId);
+            if (banner) {
+                banner[field] = field === 'qty' || field === 'qtyInOrder' || field === 'stockQty' 
+                    ? parseInt(value) || 0 
+                    : value;
+            }
+        }
+
+        function updateBannerCheckbox(internalId, category, option, checked) {
+            const banner = selectedBanners.find(b => b.internalId === internalId);
+            if (banner && banner[category]) {
+                banner[category][option] = checked;
+            }
+        }
+
+        function removeBanner(internalId) {
+            selectedBanners = selectedBanners.filter(b => b.internalId !== internalId);
+            updateBannersTable();
+        }
+
+        function openModal() {
+            if (allBanners.length === 0) {
+                alert('Please load a CSV file first!');
+                return;
+            }
+            document.getElementById('bannerModal').classList.add('active');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            updateBannerList();
+            updateSelectedCount();
+        }
+
+        function closeModal() {
+            document.getElementById('bannerModal').classList.remove('active');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            // Clean up image observer when modal closes
+            if (imageObserver) {
+                imageObserver.disconnect();
+                imageObserver = null;
+            }
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all banners?')) {
+                selectedBanners = [];
+                updateBannersTable();
+            }
+        }
+
+        function getPrintImageHTML(sku) {
+            // Use hardcoded path
+            const imagePath = 'H:\\Marketing\\Website\\FINAL CONTENT  NEW SITE 2021\\Working Folder\\Website photos\\Product Images\\Catalogue Signs\\High Vis Banners & Poly Discs\\High Vis Banners';
+            let basePath = imagePath;
+            if (!basePath.endsWith('/') && !basePath.endsWith('\\')) {
+                basePath += '/';
+            }
+
+            // Convert Windows drive path to file:// URL
+            if (/^[A-Za-z]:/.test(basePath)) {
+                basePath = 'file:///' + basePath.replace(/\\/g, '/');
+            }
+
+            // Try multiple formats - JPG first (user has JPGs), then PDF, PNG
+            const formats = ['jpg', 'jpeg', 'pdf', 'png'];
+            const skuEscaped = escapeHtml(sku);
+            const imageSources = formats.map(format => {
+                const fullPath = basePath + sku + '.' + format;
+                return escapeHtml(fullPath);
+            });
+
+            // Build simple HTML - try JPG first, then PDF as fallback
+            const imgSrc = imageSources[0]; // JPG is first
+            const pdfSrc = imageSources.find(s => s.toLowerCase().endsWith('.pdf')) || null; // PDF fallback
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7253/ingest/f7927392-b6f7-4c6f-8126-d142ac4e026e',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'BannerProductionTool.html:getPrintImageHTML',message:'getPrintImageHTML called',data:{sku:sku,basePath:basePath,pdfSrc:pdfSrc,imgSrc:imgSrc},timestamp:Date.now(),hypothesisId:'H6'})}).catch(()=>{});
+            // #endregion
+            
+            let html = '<div style="position: relative; width: 100%; height: 100%; overflow: hidden;">';
+            html += '<div style="font-size: 14px; font-weight: bold; color: #64748b; text-align: center; padding: 4px; position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 1;">IMAGE</div>';
+            // Try JPG first, PDF as fallback
+            if (imgSrc) {
+                html += '<img src="' + imgSrc + '" alt="' + skuEscaped + '" style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: block; z-index: 2;" onerror="this.style.display=\'none\'; if(this.parentElement.querySelector(\'object\')) this.parentElement.querySelector(\'object\').style.display=\'block\';" onload="this.parentElement.querySelector(\'div\').style.display=\'none\'; if(this.parentElement.querySelector(\'object\')) this.parentElement.querySelector(\'object\').style.display=\'none\';">';
+            }
+            if (pdfSrc) {
+                html += '<object data="' + pdfSrc + '" type="application/pdf" style="max-width: 100%; max-height: 100%; width: auto; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); object-fit: contain; z-index: 2; display: none;"></object>';
+            }
+            html += '</div>';
+
+            return html;
+        }
+
+        function printSheet() {
+            if (selectedBanners.length === 0) {
+                alert('Please add at least one banner before printing.');
+                return;
+            }
+
+            // Create print view
+            const printWindow = window.open('', '_blank');
+            const jobNumber = document.getElementById('jobNumber').value || 'N/A';
+            const date = new Date().toLocaleDateString();
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Banner Production Sheet - ${jobNumber}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            font-size: 11px;
+                        }
+                        h1 {
+                            margin-bottom: 10px;
+                        }
+                        .header-info {
+                            margin-bottom: 20px;
+                            padding-bottom: 10px;
+                            border-bottom: 2px solid #000;
+                        }
+                        .print-card-container {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 20px;
+                            margin-top: 20px;
+                        }
+                        .print-card {
+                            border: 2px solid #000;
+                            padding: 15px;
+                            page-break-inside: avoid;
+                            display: flex;
+                            gap: 15px;
+                            min-height: 200px;
+                        }
+                        .print-card-left {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            min-width: 180px;
+                            width: 180px;
+                        }
+                        .print-card-image {
+                            width: 100%;
+                            height: 180px;
+                            border: 1px solid #000;
+                            background: #f0f0f0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 14px;
+                            font-weight: bold;
+                            text-align: center;
+                            padding: 0;
+                            margin-bottom: 15px;
+                            overflow: hidden;
+                            position: relative;
+                        }
+                        .print-card-image img,
+                        .print-card-image object {
+                            max-width: 100%;
+                            max-height: 100%;
+                            width: auto;
+                            height: auto;
+                            object-fit: contain;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        }
+                        .print-card-tracking {
+                            width: 100%;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 10px;
+                        }
+                        .print-card-tracking-section {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 6px;
+                        }
+                        .print-card-tracking-section label {
+                            font-size: 11px;
+                            font-weight: bold;
+                        }
+                        .print-card-tracking-section .time-inputs {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 4px;
+                        }
+                        .print-card-tracking-section input {
+                            width: 100%;
+                            border: none;
+                            border-bottom: 1px solid #000;
+                            padding: 4px 0;
+                            background: transparent;
+                            font-size: 11px;
+                        }
+                        .print-card-right {
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 8px;
+                        }
+                        .print-card-info-row {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            font-size: 11px;
+                        }
+                        .print-card-info-label {
+                            font-weight: bold;
+                            min-width: 100px;
+                        }
+                        .print-card-info-row input {
+                            flex: 1;
+                            border: none;
+                            border-bottom: 1px solid #000;
+                            padding: 4px 0;
+                            background: transparent;
+                            font-size: 11px;
+                        }
+                        .print-card-checkboxes {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 15px;
+                            margin-top: 5px;
+                        }
+                        .print-card-checkbox-group {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 4px;
+                        }
+                        .print-card-checkbox-group-title {
+                            font-weight: bold;
+                            font-size: 10px;
+                            margin-bottom: 4px;
+                        }
+                        .print-card-checkbox-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            font-size: 10px;
+                        }
+                        .print-card-checkbox-item input[type="checkbox"] {
+                            width: 14px;
+                            height: 14px;
+                        }
+                        @media print {
+                            @page {
+                                margin: 1cm;
+                            }
+                            .print-card {
+                                page-break-inside: avoid;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-card-container">
+                        ${selectedBanners.map(banner => `
+                            <div class="print-card">
+                                <div class="print-card-left">
+                                    <div class="print-card-image">${getPrintImageHTML(banner.sku)}</div>
+                                    <div class="print-card-tracking">
+                                        <div class="print-card-tracking-section">
+                                            <label>Time</label>
+                                            <div class="time-inputs">
+                                                <input type="text">
+                                                <input type="text">
+                                                <input type="text">
+                                            </div>
+                                        </div>
+                                        <div class="print-card-tracking-section">
+                                            <label>Initials</label>
+                                            <input type="text">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="print-card-right">
+                                    <div class="print-card-info-row">
+                                        <span class="print-card-info-label">Job #:</span>
+                                        <input type="text" value="${escapeHtml(banner.jobNumber || '')}" style="flex: 1; border: none; border-bottom: 1px solid #000; padding: 4px 0; background: transparent; font-size: 11px;">
+                                    </div>
+                                    <div class="print-card-info-row">
+                                        <span class="print-card-info-label">SKU:</span>
+                                        <input type="text" value="${escapeHtml(banner.sku)}" style="flex: 1; border: none; border-bottom: 1px solid #000; padding: 4px 0; background: transparent; font-size: 11px;">
+                                    </div>
+                                    <div class="print-card-info-row">
+                                        <span class="print-card-info-label">QTY in Order:</span>
+                                        <input type="text" value="${banner.qtyInOrder}" style="flex: 1; border: none; border-bottom: 1px solid #000; padding: 4px 0; background: transparent; font-size: 11px;">
+                                    </div>
+                                    <div class="print-card-info-row">
+                                        <span class="print-card-info-label">QTY in Stock:</span>
+                                        <input type="text" value="${banner.stockQty}" style="flex: 1; border: none; border-bottom: 1px solid #000; padding: 4px 0; background: transparent; font-size: 11px;">
+                                    </div>
+                                    <div class="print-card-checkboxes">
+                                        <div class="print-card-checkbox-group">
+                                            <div class="print-card-checkbox-group-title">Stencil:</div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.stencil.styrene ? 'checked' : ''}>
+                                                <label>Styrene</label>
+                                            </div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.stencil.vinyl ? 'checked' : ''}>
+                                                <label>Vinyl</label>
+                                            </div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.stencil.extraSticky ? 'checked' : ''}>
+                                                <label>Extra Sticky</label>
+                                            </div>
+                                        </div>
+                                        <div class="print-card-checkbox-group">
+                                            <div class="print-card-checkbox-group-title">Ink:</div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.ink.white ? 'checked' : ''}>
+                                                <label>White</label>
+                                            </div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.ink.black ? 'checked' : ''}>
+                                                <label>Black</label>
+                                            </div>
+                                        </div>
+                                        <div class="print-card-checkbox-group">
+                                            <div class="print-card-checkbox-group-title">Ticker Tape:</div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.tickerTape.yes ? 'checked' : ''}>
+                                                <label>Yes</label>
+                                            </div>
+                                            <div class="print-card-checkbox-item">
+                                                <input type="checkbox" ${banner.tickerTape.no ? 'checked' : ''}>
+                                                <label>No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="print-card-info-row" style="margin-top: 10px;">
+                                        <span class="print-card-info-label">Completed:</span>
+                                        <input type="checkbox" style="width: 16px; height: 16px;">
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </body>
+                </html>
+            `);
+
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        }
+
+        // Event Listeners
+        document.getElementById('addBannerBtn').addEventListener('click', openModal);
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('cancelModal').addEventListener('click', closeModal);
+        document.getElementById('addSelectedBtn').addEventListener('click', addSelectedBanners);
+        document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+        document.getElementById('printBtn').addEventListener('click', printSheet);
+        document.getElementById('searchInput').addEventListener('input', updateBannerList);
+        document.getElementById('categoryFilter').addEventListener('change', updateBannerList);
+
+        // Close modal on overlay click
+        document.getElementById('bannerModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
