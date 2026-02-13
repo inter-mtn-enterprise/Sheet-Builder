@@ -105,7 +105,7 @@ export default function PrintSheetPage() {
     }
   }
 
-  const handleMarkPrinting = async () => {
+  const handleMarkInProduction = async () => {
     try {
       const response = await fetch(`/api/sheets/${params.id}`, {
         method: "PUT",
@@ -113,7 +113,7 @@ export default function PrintSheetPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          status: "printing",
+          status: "in_production",
         }),
       })
 
@@ -123,7 +123,7 @@ export default function PrintSheetPage() {
 
       toast({
         title: "Success",
-        description: "Sheet marked as printing",
+        description: "Sheet marked as In Production",
       })
 
       fetchSheet()
@@ -168,8 +168,8 @@ export default function PrintSheetPage() {
           <Printer className="mr-2 h-4 w-4" />
           Print
         </Button>
-        <Button onClick={handleMarkPrinting} variant="outline">
-          Mark as Printing
+        <Button onClick={handleMarkInProduction} variant="outline">
+          Mark as In Production
         </Button>
         <Button onClick={handleFinishAndSave} disabled={saving}>
           <Save className="mr-2 h-4 w-4" />

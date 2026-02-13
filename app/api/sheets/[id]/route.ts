@@ -59,7 +59,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { jobNumber, status, items } = body
+    const { jobNumber, status, items, estimated_completion_date } = body
 
     const updates: any = {
       updated_at: new Date().toISOString(),
@@ -68,9 +68,15 @@ export async function PUT(
     if (jobNumber !== undefined) updates.job_number = jobNumber
     if (status !== undefined) {
       updates.status = status
+      if (status === "in_production" && estimated_completion_date) {
+        updates.estimated_completion_date = estimated_completion_date
+      }
       if (status === "completed") {
         updates.completed_at = new Date().toISOString()
       }
+    }
+    if (estimated_completion_date !== undefined && status !== "in_production") {
+      updates.estimated_completion_date = estimated_completion_date
     }
 
     const { data: sheet, error: sheetError } = await supabase
@@ -116,7 +122,7 @@ export async function PUT(
     if (status) {
       await supabase.from("analytics_events").insert({
         sheet_id: params.id,
-        event_type: status === "printing" ? "printed" : status,
+        event_type: status,
         user_id: user.id,
       })
     }

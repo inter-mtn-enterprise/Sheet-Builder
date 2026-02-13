@@ -1,19 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
-import { Plus, Trash2, Edit } from "lucide-react"
+import { Plus } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +17,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { DataTable } from "@/components/ui/data-table"
+import type { ColumnsDefine } from "@/components/ui/data-table"
 
 interface Template {
   id: string
@@ -37,6 +32,7 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const { toast } = useToast()
+  const router = useRouter()
 
   useEffect(() => {
     fetchTemplates()
@@ -86,6 +82,114 @@ export default function TemplatesPage() {
     }
   }
 
+  const tableRecords = useMemo(
+    () =>
+      templates.map((t) => ({
+        id: t.id,
+        name: t.name,
+        shared: t.is_shared ? "Yes" : "No",
+        created_at: new Date(t.created_at).toLocaleDateString(),
+      })),
+    [templates]
+  )
+
+  const columns: ColumnsDefine = useMemo(
+    () => [
+      {
+        field: "name",
+        title: "Name",
+        width: "auto",
+        sort: true,
+        style: { fontWeight: "bold" },
+      },
+      {
+        field: "shared",
+        title: "Shared",
+        width: 100,
+        sort: true,
+      },
+      {
+        field: "created_at",
+        title: "Created",
+        width: 140,
+        sort: true,
+      },
+      {
+        field: "id",
+        title: "Actions",
+        width: 100,
+        disableHover: true,
+        style: { textAlign: "center" },
+        headerStyle: { textAlign: "center" },
+        icon: [
+          {
+            type: "svg" as const,
+            svg: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+            width: 16,
+            height: 16,
+            name: "edit",
+            positionType: "inlineFront" as any,
+            marginRight: 10,
+            cursor: "pointer",
+            tooltip: { title: "Edit", placement: "top" as any },
+            interactive: true,
+          },
+          {
+            type: "svg" as const,
+            svg: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+            width: 16,
+            height: 16,
+            name: "delete",
+            positionType: "inlineFront" as any,
+            cursor: "pointer",
+            tooltip: { title: "Delete", placement: "top" as any },
+            interactive: true,
+          },
+        ],
+        fieldFormat() {
+          return ""
+        },
+      },
+    ],
+    []
+  )
+
+  const handleIconClick = useCallback(
+    (args: any) => {
+      const iconName = args?.icon?.name || args?.name
+      const row = args?.row
+      if (row === undefined || row === 0) return
+      const record = tableRecords[row - 1]
+      if (!record) return
+
+      switch (iconName) {
+        case "edit":
+          router.push(`/templates/${record.id}/edit`)
+          break
+        case "delete":
+          setDeleteId(record.id)
+          break
+      }
+    },
+    [tableRecords, router]
+  )
+
+  const handleCellClick = useCallback(
+    (args: any) => {
+      const row = args?.row
+      const col = args?.col
+      if (row === undefined || row === 0) return
+      const record = tableRecords[row - 1]
+      if (!record) return
+
+      // Don't navigate if clicking the actions column (last column)
+      if (col === columns.length - 1) return
+
+      router.push(`/templates/${record.id}/edit`)
+    },
+    [tableRecords, columns.length, router]
+  )
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -118,43 +222,12 @@ export default function TemplatesPage() {
               No templates yet. Create your first template to get started.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Shared</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {templates.map((template) => (
-                  <TableRow key={template.id}>
-                    <TableCell className="font-medium">{template.name}</TableCell>
-                    <TableCell>{template.is_shared ? "Yes" : "No"}</TableCell>
-                    <TableCell>
-                      {new Date(template.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Link href={`/templates/${template.id}/edit`}>
-                          <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteId(template.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              records={tableRecords}
+              columns={columns}
+              onClickCell={handleCellClick}
+              onIconClick={handleIconClick}
+            />
           )}
         </CardContent>
       </Card>
@@ -181,4 +254,3 @@ export default function TemplatesPage() {
     </div>
   )
 }
-

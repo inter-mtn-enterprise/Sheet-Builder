@@ -52,6 +52,12 @@ export default async function ProtectedLayout({
                 >
                   Analytics
                 </Link>
+                <Link
+                  href="/production-manager"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Production Manager
+                </Link>
               </div>
             </div>
             <form action="/api/auth/logout" method="POST">
