@@ -61,7 +61,7 @@ export function ChartCard({
           {loading || !responsiveSpec ? (
             <Skeleton className="w-full h-full rounded-md" />
           ) : (
-            <VChart spec={responsiveSpec} />
+            <VChart spec={responsiveSpec as any} />
           )}
         </div>
       </CardContent>
