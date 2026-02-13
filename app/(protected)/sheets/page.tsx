@@ -230,7 +230,7 @@ export default function SheetsPage() {
   }
 
   // Draft columns: includes edit icon
-  const draftColumns: ColumnsDefine = useMemo(
+  const draftColumns = useMemo(
     () => [
       {
         field: "job_number",
@@ -276,12 +276,12 @@ export default function SheetsPage() {
           return ""
         },
       },
-    ],
+    ] as ColumnsDefine,
     [statusRender]
   )
 
   // In Production columns: includes est. completion date, no edit
-  const inProductionColumns: ColumnsDefine = useMemo(
+  const inProductionColumns = useMemo(
     () => [
       {
         field: "job_number",
@@ -333,12 +333,12 @@ export default function SheetsPage() {
           return ""
         },
       },
-    ],
+    ] as ColumnsDefine,
     [statusRender]
   )
 
   // Completed columns: includes completion date, no edit
-  const completedColumns: ColumnsDefine = useMemo(
+  const completedColumns = useMemo(
     () => [
       {
         field: "job_number",
@@ -390,7 +390,7 @@ export default function SheetsPage() {
           return ""
         },
       },
-    ],
+    ] as ColumnsDefine,
     [statusRender]
   )
 

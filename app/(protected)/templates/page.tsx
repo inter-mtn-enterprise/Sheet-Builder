@@ -93,7 +93,7 @@ export default function TemplatesPage() {
     [templates]
   )
 
-  const columns: ColumnsDefine = useMemo(
+  const columns = useMemo(
     () => [
       {
         field: "name",
@@ -150,7 +150,7 @@ export default function TemplatesPage() {
           return ""
         },
       },
-    ],
+    ] as ColumnsDefine,
     []
   )
 
