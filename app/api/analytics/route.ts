@@ -83,7 +83,7 @@ export async function GET() {
     // --- Summary stats ---
     const totalSheets = (sheets || []).length
     const completedSheets = statusCounts["completed"] || 0
-    const inProductionSheets = statusCounts["in_production"] || 0
+    const inProductionSheets = (statusCounts["in_production"] || 0) + (statusCounts["production_started"] || 0)
     const draftSheets = statusCounts["draft"] || 0
     const totalProducts = (products || []).length
 

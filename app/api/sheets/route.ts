@@ -22,7 +22,13 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false })
 
     if (status) {
-      query = query.eq("status", status)
+      // Support comma-separated statuses for multi-status filtering
+      const statuses = status.split(",").map((s) => s.trim())
+      if (statuses.length === 1) {
+        query = query.eq("status", statuses[0])
+      } else {
+        query = query.in("status", statuses)
+      }
     }
 
     if (userId) {
@@ -88,7 +94,6 @@ export async function POST(request: Request) {
         banner_sku: item.bannerSku,
         banner_name: item.bannerName,
         image_url: item.imageUrl,
-        quantity: item.quantity || 1,
         qty_in_order: item.qtyInOrder || 0,
         stock_qty: item.stockQty || 0,
         custom_fields: item.customFields || {},

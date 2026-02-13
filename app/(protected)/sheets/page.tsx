@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { Plus } from "lucide-react"
+import { Plus, Eye, Pencil, Printer, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,19 +34,127 @@ interface Sheet {
 const STATUS_BG: Record<string, string> = {
   completed: "#dcfce7",
   in_production: "#dbeafe",
+  production_started: "#fef3c7",
   draft: "#f3f4f6",
 }
 
 const STATUS_FG: Record<string, string> = {
   completed: "#166534",
   in_production: "#1e40af",
+  production_started: "#92400e",
   draft: "#374151",
 }
 
 const STATUS_LABELS: Record<string, string> = {
   completed: "Completed",
   in_production: "In Production",
+  production_started: "Production Started",
   draft: "Draft",
+}
+
+const STATUS_BADGE_CLASSES: Record<string, string> = {
+  completed: "bg-green-100 text-green-800",
+  in_production: "bg-blue-100 text-blue-800",
+  production_started: "bg-yellow-100 text-yellow-800",
+  draft: "bg-gray-100 text-gray-800",
+}
+
+// ---- Mobile card component for a single sheet ----
+function SheetCard({
+  sheet,
+  showEdit,
+  extraDate,
+  onDelete,
+}: {
+  sheet: {
+    id: string
+    job_number: string
+    template_name: string
+    status: string
+    created_by: string
+    created_at: string
+    estimated_completion_date?: string
+    completed_at?: string
+  }
+  showEdit?: boolean
+  extraDate?: { label: string; value: string }
+  onDelete: (id: string) => void
+}) {
+  const router = useRouter()
+  return (
+    <div
+      className="border rounded-lg p-4 bg-card active:bg-accent/50 transition-colors"
+      onClick={() => router.push(`/sheets/${sheet.id}`)}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <p className="font-bold text-sm truncate">{sheet.job_number}</p>
+          <p className="text-xs text-muted-foreground truncate">{sheet.template_name}</p>
+        </div>
+        <span
+          className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE_CLASSES[sheet.status] || "bg-gray-100 text-gray-800"}`}
+        >
+          {STATUS_LABELS[sheet.status] || sheet.status}
+        </span>
+      </div>
+
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-3">
+        <span>By {sheet.created_by}</span>
+        <span>{sheet.created_at}</span>
+        {extraDate && extraDate.value && (
+          <span>
+            {extraDate.label}: {extraDate.value}
+          </span>
+        )}
+      </div>
+
+      <div
+        className="flex items-center gap-1 border-t pt-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => router.push(`/sheets/${sheet.id}`)}
+          aria-label="View"
+        >
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        </Button>
+        {showEdit && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => router.push(`/sheets/${sheet.id}/edit`)}
+            aria-label="Edit"
+          >
+            <Pencil className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => router.push(`/sheets/${sheet.id}/print`)}
+          aria-label="Print"
+        >
+          <Printer className="h-4 w-4 text-muted-foreground" />
+        </Button>
+        {showEdit && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 ml-auto"
+            onClick={() => onDelete(sheet.id)}
+            aria-label="Delete"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        )}
+      </div>
+    </div>
+  )
 }
 
 export default function SheetsPage() {
@@ -110,7 +218,7 @@ export default function SheetsPage() {
     [sheets]
   )
   const inProductionSheets = useMemo(
-    () => sheets.filter((s) => s.status === "in_production"),
+    () => sheets.filter((s) => s.status === "in_production" || s.status === "production_started"),
     [sheets]
   )
   const completedSheets = useMemo(
@@ -324,11 +432,11 @@ export default function SheetsPage() {
       {
         field: "id",
         title: "Actions",
-        width: 100,
+        width: 160,
         disableHover: true,
         style: { textAlign: "center" },
         headerStyle: { textAlign: "center" },
-        icon: [VIEW_ICON, PRINT_ICON],
+        icon: [VIEW_ICON, EDIT_ICON, PRINT_ICON],
         fieldFormat() {
           return ""
         },
@@ -465,17 +573,48 @@ export default function SheetsPage() {
     [completedRecords, completedColumns.length, makeCellClickHandler]
   )
 
+  // ---- Render helpers for mobile card lists ----
+  const renderMobileCards = (
+    records: ReturnType<typeof toRecords>,
+    options: {
+      showEdit?: boolean
+      extraDate?: (r: ReturnType<typeof toRecords>[number]) => { label: string; value: string } | undefined
+      emptyMessage: string
+    }
+  ) => {
+    if (loading) {
+      return <div className="text-center py-6 text-muted-foreground text-sm">Loading...</div>
+    }
+    if (records.length === 0) {
+      return <div className="text-center py-6 text-muted-foreground text-sm">{options.emptyMessage}</div>
+    }
+    return (
+      <div className="flex flex-col gap-3">
+        {records.map((record) => (
+          <SheetCard
+            key={record.id}
+            sheet={record}
+            showEdit={options.showEdit}
+            extraDate={options.extraDate?.(record)}
+            onDelete={(id) => setDeleteId(id)}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-4 py-4 md:py-8">
+      {/* Responsive header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4 md:mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Production Sheets</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl md:text-3xl font-bold">Production Sheets</h1>
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
             Manage your production sheets
           </p>
         </div>
-        <Link href="/sheets/new/select-template">
-          <Button>
+        <Link href="/sheets/new/select-template" className="self-start sm:self-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             New Sheet
           </Button>
@@ -483,97 +622,135 @@ export default function SheetsPage() {
       </div>
 
       {/* Draft Section */}
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-4 md:mb-6">
+        <CardHeader className="p-4 md:p-6">
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Draft ({draftSheets.length})</CardTitle>
+              <CardTitle className="text-lg md:text-2xl">Draft ({draftSheets.length})</CardTitle>
               <CardDescription>
                 Sheets that are still being prepared
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
-          ) : draftRecords.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
-              No draft sheets
-            </div>
-          ) : (
-            <DataTable
-              records={draftRecords}
-              columns={draftColumns}
-              onClickCell={draftCellClick}
-              onIconClick={draftIconClick}
-            />
-          )}
+        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+          {/* Mobile card view */}
+          <div className="md:hidden">
+            {renderMobileCards(draftRecords, {
+              showEdit: true,
+              emptyMessage: "No draft sheets",
+            })}
+          </div>
+          {/* Desktop table view */}
+          <div className="hidden md:block">
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            ) : draftRecords.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                No draft sheets
+              </div>
+            ) : (
+              <DataTable
+                records={draftRecords}
+                columns={draftColumns}
+                onClickCell={draftCellClick}
+                onIconClick={draftIconClick}
+              />
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* In Production Section */}
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-4 md:mb-6">
+        <CardHeader className="p-4 md:p-6">
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>In Production ({inProductionSheets.length})</CardTitle>
+              <CardTitle className="text-lg md:text-2xl">In Production ({inProductionSheets.length})</CardTitle>
               <CardDescription>
                 Sheets currently being produced
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
-          ) : inProductionRecords.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
-              No sheets in production
-            </div>
-          ) : (
-            <DataTable
-              records={inProductionRecords}
-              columns={inProductionColumns}
-              onClickCell={inProductionCellClick}
-              onIconClick={inProductionIconClick}
-            />
-          )}
+        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+          {/* Mobile card view */}
+          <div className="md:hidden">
+            {renderMobileCards(inProductionRecords, {
+              showEdit: true,
+              extraDate: (r) =>
+                r.estimated_completion_date
+                  ? { label: "Est.", value: r.estimated_completion_date }
+                  : undefined,
+              emptyMessage: "No sheets in production",
+            })}
+          </div>
+          {/* Desktop table view */}
+          <div className="hidden md:block">
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            ) : inProductionRecords.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                No sheets in production
+              </div>
+            ) : (
+              <DataTable
+                records={inProductionRecords}
+                columns={inProductionColumns}
+                onClickCell={inProductionCellClick}
+                onIconClick={inProductionIconClick}
+              />
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Completed Section */}
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 md:p-6">
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Completed ({completedSheets.length})</CardTitle>
+              <CardTitle className="text-lg md:text-2xl">Completed ({completedSheets.length})</CardTitle>
               <CardDescription>
                 Sheets that have been completed
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading...</div>
-          ) : completedRecords.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
-              No completed sheets
-            </div>
-          ) : (
-            <DataTable
-              records={completedRecords}
-              columns={completedColumns}
-              onClickCell={completedCellClick}
-              onIconClick={completedIconClick}
-            />
-          )}
+        <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+          {/* Mobile card view */}
+          <div className="md:hidden">
+            {renderMobileCards(completedRecords, {
+              showEdit: false,
+              extraDate: (r) =>
+                r.completed_at
+                  ? { label: "Completed", value: r.completed_at }
+                  : undefined,
+              emptyMessage: "No completed sheets",
+            })}
+          </div>
+          {/* Desktop table view */}
+          <div className="hidden md:block">
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading...</div>
+            ) : completedRecords.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                No completed sheets
+              </div>
+            ) : (
+              <DataTable
+                records={completedRecords}
+                columns={completedColumns}
+                onClickCell={completedCellClick}
+                onIconClick={completedIconClick}
+              />
+            )}
+          </div>
         </CardContent>
       </Card>
 
       <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="mx-4 max-w-[calc(100vw-2rem)] sm:mx-auto sm:max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>

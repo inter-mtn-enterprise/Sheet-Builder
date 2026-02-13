@@ -239,8 +239,8 @@ export default function SheetDetailPage() {
           )}
         </div>
         <div className="flex gap-2">
-          {/* Edit button - only for draft sheets */}
-          {sheet.status === "draft" && (
+          {/* Edit button - available for draft and production sheets */}
+          {(sheet.status === "draft" || sheet.status === "in_production" || sheet.status === "production_started") && (
             <Link href={`/sheets/${params.id}/edit`}>
               <Button variant="outline">
                 <Edit className="mr-2 h-4 w-4" />

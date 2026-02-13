@@ -16,7 +16,7 @@ export async function GET() {
     const { data: sheets, error: sheetsError } = await supabase
       .from("production_sheets")
       .select("*, sheet_templates(name), users(name, email)")
-      .in("status", ["in_production", "completed"])
+      .in("status", ["in_production", "production_started", "completed"])
       .order("sort_order", { ascending: true })
 
     if (sheetsError) {

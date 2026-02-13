@@ -27,6 +27,8 @@ interface Banner {
   product_code: string
   category: string
   image_url?: string
+  qtyInOrder?: number
+  stockQty?: number
 }
 
 export default function NewSheetPage() {
@@ -87,11 +89,25 @@ export default function NewSheetPage() {
   }
 
   const handleBannerSelect = (selected: Banner[]) => {
-    setBanners([...banners, ...selected])
+    const bannersWithQuantities = selected.map(banner => ({
+      ...banner,
+      qtyInOrder: 0,
+      stockQty: 0,
+    }))
+    setBanners([...banners, ...bannersWithQuantities])
   }
 
   const removeBanner = (index: number) => {
     setBanners(banners.filter((_, i) => i !== index))
+  }
+
+  const updateBannerQuantity = (index: number, field: 'qtyInOrder' | 'stockQty', value: number) => {
+    const updatedBanners = [...banners]
+    updatedBanners[index] = {
+      ...updatedBanners[index],
+      [field]: value,
+    }
+    setBanners(updatedBanners)
   }
 
   const handleSave = async () => {
@@ -119,9 +135,8 @@ export default function NewSheetPage() {
         bannerSku: banner.sku,
         bannerName: banner.name,
         imageUrl: banner.image_url,
-        quantity: 1,
-        qtyInOrder: 0,
-        stockQty: 0,
+        qtyInOrder: banner.qtyInOrder ?? 0,
+        stockQty: banner.stockQty ?? 0,
         customFields: {},
       }))
 
@@ -250,25 +265,55 @@ export default function NewSheetPage() {
               No banners added yet. Click &quot;Add Banner&quot; to get started.
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {banners.map((banner, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border rounded-lg"
+                  className="p-4 border rounded-lg space-y-3"
                 >
-                  <div>
-                    <div className="font-medium">{banner.sku}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {banner.name}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium">{banner.sku}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {banner.name}
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeBanner(index)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor={`qtyInOrder-${index}`} className="text-sm">
+                        Qty in Order
+                      </Label>
+                      <Input
+                        id={`qtyInOrder-${index}`}
+                        type="number"
+                        min="0"
+                        value={banner.qtyInOrder ?? 0}
+                        onChange={(e) => updateBannerQuantity(index, 'qtyInOrder', parseInt(e.target.value) || 0)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`stockQty-${index}`} className="text-sm">
+                        Qty in Stock
+                      </Label>
+                      <Input
+                        id={`stockQty-${index}`}
+                        type="number"
+                        min="0"
+                        value={banner.stockQty ?? 0}
+                        onChange={(e) => updateBannerQuantity(index, 'stockQty', parseInt(e.target.value) || 0)}
+                        className="mt-1"
+                      />
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeBanner(index)}
-                  >
-                    Remove
-                  </Button>
                 </div>
               ))}
             </div>

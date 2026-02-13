@@ -49,14 +49,23 @@ interface Banner {
   image_url?: string
 }
 
+interface EditableItem {
+  id?: string
+  banner_sku: string
+  banner_name: string
+  image_url?: string
+  qty_in_order: number
+  stock_qty: number
+  custom_fields?: any
+}
+
 export default function EditSheetPage() {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
   const [sheet, setSheet] = useState<Sheet | null>(null)
-  const [items, setItems] = useState<SheetItem[]>([])
+  const [items, setItems] = useState<EditableItem[]>([])
   const [jobNumber, setJobNumber] = useState("")
-  const [banners, setBanners] = useState<Banner[]>([])
   const [bannerSelectorOpen, setBannerSelectorOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -73,32 +82,21 @@ export default function EditSheetPage() {
       const data = await response.json()
 
       if (data.sheet) {
-        // Only allow editing draft sheets
-        if (data.sheet.status !== "draft") {
-          toast({
-            title: "Cannot Edit",
-            description: "Only draft sheets can be edited.",
-            variant: "destructive",
-          })
-          router.push(`/sheets/${params.id}`)
-          return
-        }
-
         setSheet(data.sheet)
         setJobNumber(data.sheet.job_number || "")
 
-        // Convert existing items to banner format for display
+        // Convert existing items to editable format
         if (data.items) {
-          setItems(data.items)
-          const existingBanners: Banner[] = data.items.map((item: SheetItem) => ({
+          const editableItems: EditableItem[] = data.items.map((item: SheetItem) => ({
             id: item.id,
-            sku: item.banner_sku,
-            name: item.banner_name || "",
-            product_code: "",
-            category: "",
+            banner_sku: item.banner_sku,
+            banner_name: item.banner_name || "",
             image_url: item.image_url || undefined,
+            qty_in_order: item.qty_in_order || 0,
+            stock_qty: item.stock_qty || 0,
+            custom_fields: item.custom_fields || {},
           }))
-          setBanners(existingBanners)
+          setItems(editableItems)
         }
       } else {
         toast({
@@ -121,18 +119,35 @@ export default function EditSheetPage() {
   }
 
   const handleBannerSelect = (selected: Banner[]) => {
-    setBanners([...banners, ...selected])
+    const newItems: EditableItem[] = selected.map((banner) => ({
+      banner_sku: banner.sku,
+      banner_name: banner.name || "",
+      image_url: banner.image_url,
+      qty_in_order: 0,
+      stock_qty: 0,
+      custom_fields: {},
+    }))
+    setItems([...items, ...newItems])
   }
 
-  const removeBanner = (index: number) => {
-    setBanners(banners.filter((_, i) => i !== index))
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index))
+  }
+
+  const updateItemQuantity = (index: number, field: "qty_in_order" | "stock_qty", value: number) => {
+    const updatedItems = [...items]
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: Math.max(0, value),
+    }
+    setItems(updatedItems)
   }
 
   const handleSave = async () => {
-    if (banners.length === 0) {
+    if (items.length === 0) {
       toast({
         title: "Error",
-        description: "Please add at least one banner",
+        description: "Please add at least one product",
         variant: "destructive",
       })
       return
@@ -140,19 +155,15 @@ export default function EditSheetPage() {
 
     setSaving(true)
     try {
-      const updatedItems = banners.map((banner) => {
-        // Try to find existing item data for this banner
-        const existingItem = items.find((item) => item.banner_sku === banner.sku)
-        return {
-          bannerSku: banner.sku,
-          bannerName: banner.name,
-          imageUrl: banner.image_url,
-          quantity: existingItem?.quantity || 1,
-          qtyInOrder: existingItem?.qty_in_order || 0,
-          stockQty: existingItem?.stock_qty || 0,
-          customFields: existingItem?.custom_fields || {},
-        }
-      })
+      const updatedItems = items.map((item) => ({
+        itemId: item.id,
+        bannerSku: item.banner_sku,
+        bannerName: item.banner_name,
+        imageUrl: item.image_url,
+        qtyInOrder: item.qty_in_order || 0,
+        stockQty: item.stock_qty || 0,
+        customFields: item.custom_fields || {},
+      }))
 
       const response = await fetch(`/api/sheets/${params.id}`, {
         method: "PUT",
@@ -208,7 +219,7 @@ export default function EditSheetPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Edit Production Sheet</h1>
         <p className="text-muted-foreground mt-2">
-          Edit the details and items of this draft sheet
+          Edit the details and quantities for products in this sheet
         </p>
       </div>
 
@@ -248,60 +259,94 @@ export default function EditSheetPage() {
         </CardContent>
       </Card>
 
-      {/* Banners Card */}
+      {/* Products Card */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Banners</CardTitle>
+              <CardTitle>Products</CardTitle>
               <CardDescription>
-                Manage the banners in this production sheet
+                Manage products and adjust quantities for this production sheet
               </CardDescription>
             </div>
             <Button onClick={() => setBannerSelectorOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Banner
+              Add Product
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {banners.length === 0 ? (
+          {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No banners added yet. Click &quot;Add Banner&quot; to get started.
+              No products added yet. Click &quot;Add Product&quot; to get started.
             </div>
           ) : (
-            <div className="space-y-2">
-              {banners.map((banner, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 border rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    {banner.image_url && (
-                      <div className="w-10 h-10 border rounded bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        <img
-                          src={banner.image_url}
-                          alt={banner.sku}
-                          className="max-w-full max-h-full object-contain"
-                        />
+            <div className="space-y-4">
+              {items.map((item, index) => (
+                <Card key={index}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      {item.image_url && (
+                        <div className="w-16 h-16 border rounded bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <img
+                            src={item.image_url}
+                            alt={item.banner_sku}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">SKU</Label>
+                          <div className="font-medium">{item.banner_sku}</div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {item.banner_name}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`qty-in-order-${index}`} className="text-xs text-muted-foreground">
+                              Qty in Order
+                            </Label>
+                            <Input
+                              id={`qty-in-order-${index}`}
+                              type="number"
+                              min="0"
+                              value={item.qty_in_order}
+                              onChange={(e) =>
+                                updateItemQuantity(index, "qty_in_order", parseInt(e.target.value) || 0)
+                              }
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`stock-qty-${index}`} className="text-xs text-muted-foreground">
+                              Qty in Stock
+                            </Label>
+                            <Input
+                              id={`stock-qty-${index}`}
+                              type="number"
+                              min="0"
+                              value={item.stock_qty}
+                              onChange={(e) =>
+                                updateItemQuantity(index, "stock_qty", parseInt(e.target.value) || 0)
+                              }
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    <div>
-                      <div className="font-medium">{banner.sku}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {banner.name}
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeItem(index)}
+                        className="text-destructive hover:text-destructive flex-shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeBanner(index)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

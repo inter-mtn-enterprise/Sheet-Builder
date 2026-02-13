@@ -117,7 +117,11 @@ export default function ProductionManagerPage() {
         template_name: sheet.sheet_templates?.name || "N/A",
         status: sheet.status,
         status_label:
-          sheet.status === "completed" ? "Completed" : "In Production",
+          sheet.status === "completed"
+            ? "Completed"
+            : sheet.status === "production_started"
+              ? "Started"
+              : "In Production",
         created_by:
           sheet.users?.name || sheet.users?.email || "Unknown",
         startDate,
@@ -339,7 +343,7 @@ export default function ProductionManagerPage() {
               <div className="h-3 w-3 rounded-full bg-blue-500" />
               <div>
                 <div className="text-2xl font-bold">
-                  {sheets.filter((s) => s.status === "in_production").length}
+                  {sheets.filter((s) => s.status === "in_production" || s.status === "production_started").length}
                 </div>
                 <div className="text-sm text-muted-foreground">In Production</div>
               </div>
