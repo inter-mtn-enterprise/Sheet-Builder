@@ -275,66 +275,67 @@ export default function AnalyticsPage() {
     }))
   }, [data])
 
-  const recentSheetsColumns: ColumnsDefine = useMemo(
-    () => [
-      {
-        field: "id_display",
-        title: "ID",
-        width: 120,
-        style: { fontWeight: "bold", fontFamily: "monospace", fontSize: 12 },
-      },
-      {
-        field: "status",
-        title: "Status",
-        width: 120,
-        sort: true,
-        customRender(args: any) {
-          const { height } = args.rect
-          const status = args.value || ""
-          const label = STATUS_LABELS[status] || status
-          const bg = STATUS_BG[status] || "#f3f4f6"
-          const fg = STATUS_FG[status] || "#374151"
-          const textWidth = Math.max(label.length * 7 + 16, 50)
-          return {
-            renderDefault: false,
-            elements: [
-              {
-                type: "rect" as const,
-                x: 12,
-                y: (height - 22) / 2,
-                width: textWidth,
-                height: 22,
-                fill: bg,
-                cornerRadius: 11,
-              },
-              {
-                type: "text" as const,
-                x: 12 + textWidth / 2,
-                y: height / 2,
-                text: label,
-                fontSize: 11,
-                fontWeight: "600",
-                fill: fg,
-                textAlign: "center",
-                textBaseline: "middle",
-              },
-            ],
-          }
+  const recentSheetsColumns = useMemo(
+    () =>
+      [
+        {
+          field: "id_display",
+          title: "ID",
+          width: 120,
+          style: { fontWeight: "bold", fontFamily: "monospace", fontSize: 12 },
         },
-      },
-      {
-        field: "user_name",
-        title: "Created By",
-        width: "auto",
-        sort: true,
-      },
-      {
-        field: "created_at",
-        title: "Created",
-        width: 120,
-        sort: true,
-      },
-    ],
+        {
+          field: "status",
+          title: "Status",
+          width: 120,
+          sort: true,
+          customRender(args: any) {
+            const { height } = args.rect
+            const status = args.value || ""
+            const label = STATUS_LABELS[status] || status
+            const bg = STATUS_BG[status] || "#f3f4f6"
+            const fg = STATUS_FG[status] || "#374151"
+            const textWidth = Math.max(label.length * 7 + 16, 50)
+            return {
+              renderDefault: false,
+              elements: [
+                {
+                  type: "rect" as const,
+                  x: 12,
+                  y: (height - 22) / 2,
+                  width: textWidth,
+                  height: 22,
+                  fill: bg,
+                  cornerRadius: 11,
+                },
+                {
+                  type: "text" as const,
+                  x: 12 + textWidth / 2,
+                  y: height / 2,
+                  text: label,
+                  fontSize: 11,
+                  fontWeight: "600",
+                  fill: fg,
+                  textAlign: "center",
+                  textBaseline: "middle",
+                },
+              ],
+            }
+          },
+        },
+        {
+          field: "user_name",
+          title: "Created By",
+          width: "auto",
+          sort: true,
+        },
+        {
+          field: "created_at",
+          title: "Created",
+          width: 120,
+          sort: true,
+        },
+      ] as ColumnsDefine,
     []
   )
 
