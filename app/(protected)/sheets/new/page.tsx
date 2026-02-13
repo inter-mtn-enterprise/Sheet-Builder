@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -41,20 +41,7 @@ export default function NewSheetPage() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const templateId = searchParams.get("templateId")
-    
-    if (!templateId) {
-      // No template selected, redirect to step 1
-      router.push("/sheets/new/select-template")
-      return
-    }
-
-    setSelectedTemplateId(templateId)
-    fetchTemplate(templateId)
-  }, [searchParams, router])
-
-  const fetchTemplate = async (templateId: string) => {
+  const fetchTemplate = useCallback(async (templateId: string) => {
     try {
       const response = await fetch(`/api/templates/${templateId}`)
       const data = await response.json()
@@ -79,7 +66,20 @@ export default function NewSheetPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router, toast])
+
+  useEffect(() => {
+    const templateId = searchParams.get("templateId")
+    
+    if (!templateId) {
+      // No template selected, redirect to step 1
+      router.push("/sheets/new/select-template")
+      return
+    }
+
+    setSelectedTemplateId(templateId)
+    fetchTemplate(templateId)
+  }, [searchParams, router, fetchTemplate])
 
   const handleChangeTemplate = () => {
     // Navigate back to step 1 to change template
@@ -247,7 +247,7 @@ export default function NewSheetPage() {
         <CardContent>
           {banners.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No banners added yet. Click "Add Banner" to get started.
+              No banners added yet. Click &quot;Add Banner&quot; to get started.
             </div>
           ) : (
             <div className="space-y-2">
