@@ -42,6 +42,7 @@ export interface GanttChartProps {
   maxDate?: string
   initialViewMode?: ViewMode
   onViewSheet?: (record: GanttRecord) => void
+  onBarClick?: (record: GanttRecord) => void
   onBarDateChange?: (recordId: string, startDate: string, endDate: string) => void
   onCreateDependencyLink?: (args: any) => void
   onDeleteDependencyLink?: (args: any) => void
@@ -165,6 +166,7 @@ export const GanttChart = forwardRef<GanttChartHandle, GanttChartProps>(
       maxDate,
       initialViewMode = "day",
       onViewSheet,
+      onBarClick,
       onBarDateChange,
       onCreateDependencyLink,
       onDeleteDependencyLink,
@@ -178,12 +180,14 @@ export const GanttChart = forwardRef<GanttChartHandle, GanttChartProps>(
 
     const callbacksRef = useRef({
       onViewSheet,
+      onBarClick,
       onBarDateChange,
       onCreateDependencyLink,
       onDeleteDependencyLink,
     })
     callbacksRef.current = {
       onViewSheet,
+      onBarClick,
       onBarDateChange,
       onCreateDependencyLink,
       onDeleteDependencyLink,
@@ -430,6 +434,31 @@ export const GanttChart = forwardRef<GanttChartHandle, GanttChartProps>(
       if (GANTT_EVENT_TYPE?.DELETE_DEPENDENCY_LINK) {
         gantt.on(GANTT_EVENT_TYPE.DELETE_DEPENDENCY_LINK as any, (args: any) => {
           callbacksRef.current.onDeleteDependencyLink?.(args)
+        })
+      }
+
+      // ---- BAR CLICK (task bar click on the timeline) ----
+      if (GANTT_EVENT_TYPE?.CLICK_TASK_BAR) {
+        gantt.on(GANTT_EVENT_TYPE.CLICK_TASK_BAR as any, (args: any) => {
+          const record = args?.record
+          if (record) {
+            callbacksRef.current.onBarClick?.(record)
+          }
+        })
+      }
+
+      // ---- ROW CLICK in the task list table ----
+      if (listTable) {
+        listTable.on("click_cell" as any, (args: any) => {
+          const { col, row } = args
+          // Skip header row (row 0) and the icon column (last column)
+          if (typeof row !== "number" || row === 0) return
+          const columns = listTable.columns || []
+          if (typeof col === "number" && columns[col]?.field === "id") return
+          const record = listTable.getCellOriginRecord(col, row)
+          if (record) {
+            callbacksRef.current.onBarClick?.(record)
+          }
         })
       }
     }, [options, handleDateChangeEvent])

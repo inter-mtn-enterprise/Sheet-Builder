@@ -24,6 +24,7 @@ import {
   CalendarRange,
   LayoutGrid,
 } from "lucide-react"
+import { OrderDetailsDrawer } from "@/components/OrderDetailsDrawer"
 
 interface SheetRecord {
   id: string
@@ -62,6 +63,8 @@ export default function ProductionManagerPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [savingOrder, setSavingOrder] = useState(false)
   const [activeView, setActiveView] = useState<ViewMode>("day")
+  const [drawerSheetId, setDrawerSheetId] = useState<string | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const fetchData = useCallback(
     async (showRefreshing = false) => {
@@ -174,6 +177,13 @@ export default function ProductionManagerPage() {
     },
     [router]
   )
+
+  const handleBarClick = useCallback((record: GanttRecord) => {
+    if (record?.id) {
+      setDrawerSheetId(record.id)
+      setDrawerOpen(true)
+    }
+  }, [])
 
   const handleBarDateChange = useCallback(
     async (recordId: string, startDate: string, endDate: string) => {
@@ -452,6 +462,7 @@ export default function ProductionManagerPage() {
                 maxDate={dateRange.maxDate}
                 initialViewMode="day"
                 onViewSheet={handleViewSheet}
+                onBarClick={handleBarClick}
                 onBarDateChange={handleBarDateChange}
                 onCreateDependencyLink={handleCreateDependencyLink}
                 onDeleteDependencyLink={handleDeleteDependencyLink}
@@ -460,6 +471,13 @@ export default function ProductionManagerPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Order Details Drawer */}
+      <OrderDetailsDrawer
+        sheetId={drawerSheetId}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   )
 }
