@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/sheets", label: "Sheets" },
   { href: "/templates", label: "Templates" },
   { href: "/banners", label: "Banners" },
+  { href: "/products", label: "Products" },
   { href: "/analytics", label: "Analytics" },
   { href: "/production-manager", label: "Production Manager" },
   { href: "/work-log", label: "Work Log" },

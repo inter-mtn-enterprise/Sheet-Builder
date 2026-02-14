@@ -19,9 +19,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search") || ""
     const category = searchParams.get("category") || ""
+    const categoryId = searchParams.get("categoryId") || ""
     const page = parseInt(searchParams.get("page") || "1", 10)
     const limit = parseInt(searchParams.get("limit") || "60", 10)
     const categoriesOnly = searchParams.get("categoriesOnly") === "true"
+    const includeCategoryDetails = searchParams.get("includeCategoryDetails") === "true"
 
     // Template-level filter params
     const categoriesToInclude = parseJsonParam(searchParams.get("categoriesToInclude"))
@@ -31,8 +33,25 @@ export async function GET(request: Request) {
 
     // If only categories are requested, return them quickly
     if (categoriesOnly) {
-      // Supabase defaults to 1000 rows max per query, so we paginate
-      // through all rows to collect every distinct category.
+      // First try to get categories from product_categories table (Salesforce imported)
+      const { data: sfCategories, error: sfCatError } = await supabase
+        .from("product_categories")
+        .select("id, name, parent_category_id")
+        .order("name", { ascending: true })
+
+      if (!sfCatError && sfCategories && sfCategories.length > 0) {
+        // Return Salesforce categories with hierarchy info
+        return NextResponse.json({
+          categories: sfCategories.map(c => c.name),
+          categoryDetails: includeCategoryDetails ? sfCategories.map(c => ({
+            id: c.id,
+            name: c.name,
+            parentCategoryId: c.parent_category_id,
+          })) : undefined,
+        })
+      }
+
+      // Fallback: get distinct categories from product_catalog (backward compatibility)
       const allCategories = new Set<string>()
       const batchSize = 1000
       let offset = 0
@@ -72,9 +91,10 @@ export async function GET(request: Request) {
     const from = (page - 1) * limit
     const to = from + limit - 1
 
+    // Build query - join with product_categories if filtering by categoryId
     let query = supabase
       .from("product_catalog")
-      .select("*", { count: "exact" })
+      .select(includeCategoryDetails ? "*, product_categories!product_catalog_primary_category_id_fkey(id, name)" : "*", { count: "exact" })
       .order("sku", { ascending: true })
       .range(from, to)
 
@@ -82,8 +102,14 @@ export async function GET(request: Request) {
       query = query.or(`sku.ilike.%${search}%,name.ilike.%${search}%,product_code.ilike.%${search}%`)
     }
 
+    // Filter by category name (backward compatible)
     if (category && category !== "all") {
       query = query.eq("category", category)
+    }
+
+    // Filter by categoryId (new method using product_categories)
+    if (categoryId) {
+      query = query.eq("primary_category_id", categoryId)
     }
 
     // Apply inclusion filters (union: category in list OR sku in list)

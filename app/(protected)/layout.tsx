@@ -63,6 +63,12 @@ export default async function ProtectedLayout({
                   Banners
                 </Link>
                 <Link
+                  href="/products"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Products
+                </Link>
+                <Link
                   href="/analytics"
                   className="text-sm text-muted-foreground hover:text-foreground"
                 >
