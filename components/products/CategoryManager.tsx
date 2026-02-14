@@ -404,7 +404,7 @@ export function CategoryManager({ onRefresh }: CategoryManagerProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Category</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedCategory?.name}"? This will
+              Are you sure you want to delete &quot;{selectedCategory?.name}&quot;? This will
               remove all product assignments to this category. This action cannot be
               undone.
             </AlertDialogDescription>
